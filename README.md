@@ -1,8 +1,12 @@
 # AfC-submit-wizard
 
-A tool to help editors create drafts in draftspace on English Wikipedia.
+A tool to help editors submit their already created drafts on English Wikipedia. The tool assists editors with placing {{AfC topic}}s, short descriptions, and WikiProject banners.
 
-It is written in JavaScript and leverages the &withJS= URL technique for loading scripts.
+The goal is to help a draft writer get their draft found by reviewers that specialize in certain kinds of drafts. These various tags help specialist reviewers find the draft.
+
+## Languages and frameworks
+
+This tool is written in JavaScript, uses OOUI for its front end, and uses the &withJS= URL technique for loading scripts.
 
 ## How to use
 
