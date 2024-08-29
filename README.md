@@ -6,7 +6,7 @@ The goal is to help a draft writer get their draft found by reviewers that speci
 
 ## Languages and frameworks
 
-This tool is written in JavaScript, uses OOUI for its front end, and uses the &withJS= URL technique for loading scripts.
+This tool is written in JavaScript, uses OOUI for its front end, and uses the &withJS= URL technique for loading the script.
 
 ## How to use
 
