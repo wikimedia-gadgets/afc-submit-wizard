@@ -59,6 +59,12 @@ var messages = {
 	"orestopic-placeholder": "Start typing to search for topics ...",
 	"orestopic-label": "Topic classifiers",
 	"orestopic-helptip": "Pick the topic areas that are relevant",
+	"bestsources-placeholder1": "Enter your first source here",
+	"bestsources-placeholder2": "Enter your second source here",
+	"bestsources-placeholder3": "Enter your third source here",
+	"source-fieldset-label": "Best sources",
+	"bestsources-desc": "Article reviewers rarely have the time to read through [[WP:REFBOMB|dozens of sources]]. Drafts with a few solid sources are more likely to be reviewed soon than drafts with many borderline sources.",
+	"bestsources-desc2": "Please provide what you think are the three best <b>[[WP:RS|reliable sources]]</b> that are <b>[[WP:IS|independent]]</b> and provide <b>[[WP:SIGCOV|significant coverage]]</b> of the topic:",
 	"submit-label": "Submit",
 	"footer-text": "<small>If you are not sure about what to enter in a field, you can skip it. If you need further help, you can ask at the <b>[[WP:AFCHD|AfC help desk]]</b> or get <b>[[WP:IRCHELP|live help]]</b>.<br>Facing some issues in using this form? <b>[/w/index.php?title=Wikipedia_talk:WikiProject_Articles_for_creation/Submission_wizard&action=edit&section=new&preloadtitle=Issue%20with%20submission%20form&editintro=Wikipedia_talk:WikiProject_Articles_for_creation/Submission_wizard/editintro Report it]</b>.</small>",
 	"submitting-as": "Submitting as User:$1",
@@ -172,7 +178,38 @@ function constructUI() {
 				align: 'top',
 				help: msg('orestopic-helptip'),
 				helpInline: true
+			})
+		]
+	});
+	
+	ui.sourceFieldset = new OO.ui.FieldsetLayout({
+		label: msg('source-fieldset-label'),
+		classes: [ 'container' ],
+		items: [
+			ui.sourceLayoutDesc = new OO.ui.FieldLayout(new OO.ui.LabelWidget({
+				label: $('<div>')
+					.css("width", "100%")
+					.css("max-width", "50em")
+					.css("text-align", "justify")
+					.append(linkify(msg('bestsources-desc')) + "<br>" + linkify(msg('bestsources-desc2')))
+			}), {
+				align: 'top'
 			}),
+			
+			ui.sourceLayout1 = new OO.ui.FieldLayout(ui.bestsourcesInput1 = new OO.ui.TextInputWidget({
+				placeholder: msg('bestsources-placeholder1'),
+				maxLength: 200
+			})),
+			
+			ui.sourceLayout2 = new OO.ui.FieldLayout(ui.bestsourcesInput2 = new OO.ui.TextInputWidget({
+				placeholder: msg('bestsources-placeholder2'),
+				maxLength: 200
+			})),
+			
+			ui.sourceLayout3 = new OO.ui.FieldLayout(ui.bestsourcesInput3 = new OO.ui.TextInputWidget({
+				placeholder: msg('bestsources-placeholder3'),
+				maxLength: 200
+			})),
 
 			ui.submitLayout = new OO.ui.FieldLayout(ui.submitButton = new OO.ui.ButtonWidget({
 				label: msg('submit-label'),
@@ -209,7 +246,7 @@ function constructUI() {
 
 	var asUser = mw.util.getParamValue('username');
 	if (asUser && asUser !== mw.config.get('wgUserName')) {
-		ui.fieldset.addItems([
+		ui.sourceFieldset.addItems([
 			new OO.ui.FieldLayout(new OO.ui.MessageWidget({
 				type: 'notice',
 				inline: true,
@@ -219,7 +256,7 @@ function constructUI() {
 	}
 
 	// Attach
-	$('#afc-submit-wizard-container').empty().append(ui.fieldset.$element, ui.footerLayout.$element);
+	$('#afc-submit-wizard-container').empty().append(ui.fieldset.$element, ui.sourceFieldset.$element, ui.footerLayout.$element);
 
 	// Populate talk page tags for multi-select widget
 	afc.talkTagOptionsLoaded = getJSONPage('Wikipedia:WikiProject Articles for creation/WikiProject templates.json').then(function (data) {
@@ -504,7 +541,7 @@ function extractWikiProjectTagsFromText(text) {
  */
 function setMainStatus(type, message) {
 	if (!ui.mainStatusLayout || !ui.mainStatusLayout.isElementAttached()) {
-		ui.fieldset.addItems([
+		ui.sourceFieldset.addItems([
 			ui.mainStatusLayout = new OO.ui.FieldLayout(ui.mainStatusArea = new OO.ui.MessageWidget())
 		]);
 	}
@@ -519,7 +556,7 @@ function setMainStatus(type, message) {
  */
 function setTalkStatus(type, message) {
 	if (!ui.talkStatusLayout) {
-		ui.fieldset.addItems([
+		ui.sourceFieldset.addItems([
 			ui.talkStatusLayout = new OO.ui.FieldLayout(ui.talkStatusArea = new OO.ui.MessageWidget())
 		]);
 	}
@@ -548,7 +585,7 @@ function handleSubmit() {
 		var errors = errorsFromPageData(apiPage);
 		if (errors.length) {
 			ui.titleLayout.setErrors(errors);
-			ui.fieldset.removeItems([ui.mainStatusLayout]);
+			ui.sourceFieldset.removeItems([ui.mainStatusLayout]);
 			ui.submitButton.setDisabled(false);
 			ui.titleLayout.scrollElementIntoView();
 			return;
@@ -566,7 +603,7 @@ function handleSubmit() {
 			}, config.redirectionDelay);
 		}, function (code, err) {
 			if (code === 'captcha') {
-				ui.fieldset.removeItems([ui.mainStatusLayout, ui.talkStatusLayout]);
+				ui.sourceFieldset.removeItems([ui.mainStatusLayout, ui.talkStatusLayout]);
 				ui.captchaLayout.scrollElementIntoView();
 			} else {
 				setMainStatus('error', msg('error-saving-main', makeErrorMessage(code, err)));
@@ -617,7 +654,7 @@ function saveDraftPage(title, text) {
 	if (ui.captchaLayout && ui.captchaLayout.isElementAttached()) {
 		editParams.captchaid = afc.captchaid;
 		editParams.captchaword = ui.captchaInput.getValue();
-		ui.fieldset.removeItems([ui.captchaLayout]);
+		ui.sourceFieldset.removeItems([ui.captchaLayout]);
 	}
 	return afc.api.postWithEditToken(editParams).then(function (data) {
 		if (!data.edit || data.edit.result !== 'Success') {
@@ -626,7 +663,7 @@ function saveDraftPage(title, text) {
 
 				var url = data.edit.captcha.url;
 				afc.captchaid = data.edit.captcha.id; // abuse of global?
-				ui.fieldset.addItems([
+				ui.sourceFieldset.addItems([
 					ui.captchaLayout = new OO.ui.FieldLayout(ui.captchaInput = new OO.ui.TextInputWidget({
 						placeholder: msg('captcha-placeholder'),
 						required: true
@@ -708,6 +745,22 @@ function prepareDraftText(page) {
 	// put AfC submission template
 	header += '{{subst:submit|1=' + (mw.util.getParamValue('username') || '{{subst:REVISIONUSER}}') + '}}\n';
 
+	// Check for best sources
+	if (ui.bestsourcesInput1.getValue() || ui.bestsourcesInput2.getValue() || ui.bestsourcesInput3.getValue()) {
+		text = text.replace(/\{\{Best sources\|(.*?)\}\}/g, '');
+		bestSources = '{{Best sources';
+		if (ui.bestsourcesInput1.getValue()) {
+			bestSources += ' | src1 = ' + ui.bestsourcesInput1.getValue();
+		}
+		if (ui.bestsourcesInput2.getValue()) {
+			bestSources += ' | src2 = ' + ui.bestsourcesInput2.getValue();
+		}
+		if (ui.bestsourcesInput3.getValue()) {
+			bestSources += ' | src3 = ' + ui.bestsourcesInput3.getValue();
+		}
+		bestSources += '}}';
+		header += bestSources;
+	}
 	// insert everything to the top
 	text = header + text;
 	debug(text);
