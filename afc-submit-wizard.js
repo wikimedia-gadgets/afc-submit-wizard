@@ -63,8 +63,7 @@ var messages = {
 	"bestsources-placeholder2": "Enter your second source here",
 	"bestsources-placeholder3": "Enter your third source here",
 	"source-fieldset-label": "Best sources",
-	"bestsources-desc": "Article reviewers rarely have the time to read through [[WP:REFBOMB|dozens of sources]]. Drafts with a few solid sources are more likely to be reviewed soon than drafts with many borderline sources.",
-	"bestsources-desc2": "Please provide what you think are the three best <b>[[WP:RS|reliable sources]]</b> that are <b>[[WP:IS|independent]]</b> and provide <b>[[WP:SIGCOV|significant coverage]]</b> of the topic:",
+	"bestsources-desc": "Articles generally require <b>[[Wikipedia:SIGCOV|significant coverage]]</b>, in <b>[[Wikipedia:RS|reliable sources]]</b>, that are <b>[[WP:INDY|independent]]</b> of the topic. You can increase the chance that your draft is reviewed quickly by providing the three strongest sources below:",
 	"submit-label": "Submit",
 	"footer-text": "<small>If you are not sure about what to enter in a field, you can skip it. If you need further help, you can ask at the <b>[[WP:AFCHD|AfC help desk]]</b> or get <b>[[WP:IRCHELP|live help]]</b>.<br>Facing some issues in using this form? <b>[/w/index.php?title=Wikipedia_talk:WikiProject_Articles_for_creation/Submission_wizard&action=edit&section=new&preloadtitle=Issue%20with%20submission%20form&editintro=Wikipedia_talk:WikiProject_Articles_for_creation/Submission_wizard/editintro Report it]</b>.</small>",
 	"submitting-as": "Submitting as User:$1",
@@ -191,7 +190,7 @@ function constructUI() {
 					.css("width", "100%")
 					.css("max-width", "50em")
 					.css("text-align", "justify")
-					.append(linkify(msg('bestsources-desc')) + "<br>" + linkify(msg('bestsources-desc2')))
+					.append(linkify(msg('bestsources-desc')))
 			}), {
 				align: 'top'
 			}),
