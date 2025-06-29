@@ -62,8 +62,9 @@ var messages = {
 	"bestsources-placeholder1": "Enter your first source here",
 	"bestsources-placeholder2": "Enter your second source here",
 	"bestsources-placeholder3": "Enter your third source here",
-	"source-fieldset-label": "Best sources",
 	"bestsources-desc": "Articles generally require <b>[[Wikipedia:SIGCOV|significant coverage]]</b>, in <b>[[Wikipedia:RS|reliable sources]]</b>, that are <b>[[WP:INDY|independent]]</b> of the topic. You can increase the chance that your draft is reviewed quickly by providing the three strongest sources below:",
+	"sng-desc": "On Wikipedia, <b>[[Wikipedia:Notability|notability]]</b> is a test used by editors to decide whether a given topic warrants its own article. Select one or more <b>[[Category:Wikipedia notability guidelines|notability guidelines]]</b> that you believe the topic meets.",
+	"sng-helptip": "Select one or more notability guidelines that you believe the topic meets",
 	"submit-label": "Submit",
 	"footer-text": "<small>If you are not sure about what to enter in a field, you can skip it. If you need further help, you can ask at the <b>[[WP:AFCHD|AfC help desk]]</b> or get <b>[[WP:IRCHELP|live help]]</b>.<br>Facing some issues in using this form? <b>[/w/index.php?title=Wikipedia_talk:WikiProject_Articles_for_creation/Submission_wizard&action=edit&section=new&preloadtitle=Issue%20with%20submission%20form&editintro=Wikipedia_talk:WikiProject_Articles_for_creation/Submission_wizard/editintro Report it]</b>.</small>",
 	"submitting-as": "Submitting as User:$1",
@@ -177,14 +178,31 @@ function constructUI() {
 				align: 'top',
 				help: msg('orestopic-helptip'),
 				helpInline: true
-			})
-		]
-	});
-	
-	ui.sourceFieldset = new OO.ui.FieldsetLayout({
-		label: msg('source-fieldset-label'),
-		classes: [ 'container' ],
-		items: [
+			}),
+			
+			ui.sngDesc = new OO.ui.FieldLayout(new OO.ui.LabelWidget({
+				label: $('<div>')
+					.css("width", "100%")
+					.css("max-width", "50em")
+					.css("text-align", "justify")
+					.append(linkify(msg('sng-desc')))
+			}), {
+				align: 'top'
+			}),
+			
+			ui.sngLayout = new OO.ui.FieldLayout(ui.sngInput = new OO.ui.MenuTagMultiselectWidget({
+				tagLimit: 10,
+				autocomplete: false, // XXX: doesn't seem to work
+				options: [ "General", "Academics", "Astronomical objects", "Books", "Events", "Films", "Geographic features", "Music", "Video games", "Numbers", "Organizations and companies", "People", "Species", "Sports", "Web" ].map(function (e) {
+					return {
+						data: e,
+						label: e
+					};
+				})
+			}), {
+				align: 'top',
+			}),
+			
 			ui.sourceLayoutDesc = new OO.ui.FieldLayout(new OO.ui.LabelWidget({
 				label: $('<div>')
 					.css("width", "100%")
@@ -245,7 +263,7 @@ function constructUI() {
 
 	var asUser = mw.util.getParamValue('username');
 	if (asUser && asUser !== mw.config.get('wgUserName')) {
-		ui.sourceFieldset.addItems([
+		ui.fieldset.addItems([
 			new OO.ui.FieldLayout(new OO.ui.MessageWidget({
 				type: 'notice',
 				inline: true,
@@ -255,7 +273,7 @@ function constructUI() {
 	}
 
 	// Attach
-	$('#afc-submit-wizard-container').empty().append(ui.fieldset.$element, ui.sourceFieldset.$element, ui.footerLayout.$element);
+	$('#afc-submit-wizard-container').empty().append(ui.fieldset.$element, ui.footerLayout.$element);
 
 	// Populate talk page tags for multi-select widget
 	afc.talkTagOptionsLoaded = getJSONPage('Wikipedia:WikiProject Articles for creation/WikiProject templates.json').then(function (data) {
@@ -540,7 +558,7 @@ function extractWikiProjectTagsFromText(text) {
  */
 function setMainStatus(type, message) {
 	if (!ui.mainStatusLayout || !ui.mainStatusLayout.isElementAttached()) {
-		ui.sourceFieldset.addItems([
+		ui.fieldset.addItems([
 			ui.mainStatusLayout = new OO.ui.FieldLayout(ui.mainStatusArea = new OO.ui.MessageWidget())
 		]);
 	}
@@ -555,7 +573,7 @@ function setMainStatus(type, message) {
  */
 function setTalkStatus(type, message) {
 	if (!ui.talkStatusLayout) {
-		ui.sourceFieldset.addItems([
+		ui.fieldset.addItems([
 			ui.talkStatusLayout = new OO.ui.FieldLayout(ui.talkStatusArea = new OO.ui.MessageWidget())
 		]);
 	}
@@ -584,7 +602,7 @@ function handleSubmit() {
 		var errors = errorsFromPageData(apiPage);
 		if (errors.length) {
 			ui.titleLayout.setErrors(errors);
-			ui.sourceFieldset.removeItems([ui.mainStatusLayout]);
+			ui.fieldset.removeItems([ui.mainStatusLayout]);
 			ui.submitButton.setDisabled(false);
 			ui.titleLayout.scrollElementIntoView();
 			return;
@@ -602,7 +620,7 @@ function handleSubmit() {
 			}, config.redirectionDelay);
 		}, function (code, err) {
 			if (code === 'captcha') {
-				ui.sourceFieldset.removeItems([ui.mainStatusLayout, ui.talkStatusLayout]);
+				ui.fieldset.removeItems([ui.mainStatusLayout, ui.talkStatusLayout]);
 				ui.captchaLayout.scrollElementIntoView();
 			} else {
 				setMainStatus('error', msg('error-saving-main', makeErrorMessage(code, err)));
@@ -653,7 +671,7 @@ function saveDraftPage(title, text) {
 	if (ui.captchaLayout && ui.captchaLayout.isElementAttached()) {
 		editParams.captchaid = afc.captchaid;
 		editParams.captchaword = ui.captchaInput.getValue();
-		ui.sourceFieldset.removeItems([ui.captchaLayout]);
+		ui.fieldset.removeItems([ui.captchaLayout]);
 	}
 	return afc.api.postWithEditToken(editParams).then(function (data) {
 		if (!data.edit || data.edit.result !== 'Success') {
@@ -662,7 +680,7 @@ function saveDraftPage(title, text) {
 
 				var url = data.edit.captcha.url;
 				afc.captchaid = data.edit.captcha.id; // abuse of global?
-				ui.sourceFieldset.addItems([
+				ui.fieldset.addItems([
 					ui.captchaLayout = new OO.ui.FieldLayout(ui.captchaInput = new OO.ui.TextInputWidget({
 						placeholder: msg('captcha-placeholder'),
 						required: true
@@ -745,20 +763,21 @@ function prepareDraftText(page) {
 	header += '{{subst:submit|1=' + (mw.util.getParamValue('username') || '{{subst:REVISIONUSER}}') + '}}\n';
 
 	// Check for best sources
-	if (ui.bestsourcesInput1.getValue() || ui.bestsourcesInput2.getValue() || ui.bestsourcesInput3.getValue()) {
-		text = text.replace(/\{\{Best sources\|(.*?)\}\}/g, '');
-		bestSources = '{{Best sources';
-		if (ui.bestsourcesInput1.getValue()) {
-			bestSources += ' | src1 = ' + ui.bestsourcesInput1.getValue();
+	sng = ui.sngInput.getValue();
+	sng = sng.map(x => x.toLowerCase());
+	sourcesExist = ui.bestsourcesInput1.getValue() || ui.bestsourcesInput2.getValue() || ui.bestsourcesInput3.getValue();
+	if (sng.length > 0 || sourcesExist) {
+		header += '{{afc comment|1=';
+		if (sng.length > 0) {
+			if (sng.length > 1) {
+				sng[sng.length - 1] = 'and ' + sng[sng.length - 1];
+			}
+			header += 'I believe this article meets the ' + sng.join(sng.length > 2 ? ', ' : ' ') + ' notability guideline' + (sng.length > 1 ? 's' : '') + '. ';
 		}
-		if (ui.bestsourcesInput2.getValue()) {
-			bestSources += ' | src2 = ' + ui.bestsourcesInput2.getValue();
+		if (sourcesExist) {
+			header += '[[WP:THREE]] sources are available on the talk page. ';
 		}
-		if (ui.bestsourcesInput3.getValue()) {
-			bestSources += ' | src3 = ' + ui.bestsourcesInput3.getValue();
-		}
-		bestSources += '}}';
-		header += bestSources;
+		header +=  '~~' + '~~}}\n';
 	}
 	// insert everything to the top
 	text = header + text;
@@ -799,7 +818,23 @@ function prepareTalkText(initialText) {
 
 	// remove |class=draft parameter in any WikiProject templates
 	text = text.replace(/(\{\{wikiproject.*?)\|\s*class\s*=\s*draft\s*/gi, '$1');
-
+	
+	if (ui.bestsourcesInput1.getValue() || ui.bestsourcesInput2.getValue() || ui.bestsourcesInput3.getValue()) {
+		text = text.replace(/\{\{Best sources\|(.*?)\}\}/g, '');
+		bestSources = '\n== [[WP:THREE]] best sources ==\n{{Best sources';
+		if (ui.bestsourcesInput1.getValue()) {
+			bestSources += ' | src1 = ' + ui.bestsourcesInput1.getValue();
+		}
+		if (ui.bestsourcesInput2.getValue()) {
+			bestSources += ' | src2 = ' + ui.bestsourcesInput2.getValue();
+		}
+		if (ui.bestsourcesInput3.getValue()) {
+			bestSources += ' | src3 = ' + ui.bestsourcesInput3.getValue();
+		}
+		bestSources += '}}';
+		text += bestSources;
+	}
+	
 	return text;
 }
 
