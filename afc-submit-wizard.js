@@ -62,7 +62,7 @@ var messages = {
 	"bestsources-placeholder1": "Enter your first source here",
 	"bestsources-placeholder2": "Enter your second source here",
 	"bestsources-placeholder3": "Enter your third source here",
-	"bestsources-desc": "Articles generally require <b>[[Wikipedia:SIGCOV|significant coverage]]</b>, in <b>[[Wikipedia:RS|reliable sources]]</b>, that are <b>[[WP:INDY|independent]]</b> of the topic. You can increase the chance that your draft is reviewed quickly by providing the three strongest sources below:",
+	"bestsources-desc": "Articles generally require <b>[[Wikipedia:SIGCOV|significant coverage]]</b>, in <b>[[Wikipedia:RS|reliable sources]]</b> (such as newspapers and books), that are <b>[[WP:INDY|independent]]</b> of the topic. You can increase the chance that your draft is reviewed quickly by providing the three strongest sources below:",
 	"sng-desc": "On Wikipedia, <b>[[Wikipedia:Notability|notability]]</b> is a test used by editors to decide whether a given topic warrants its own article. Select one or more <b>[[Category:Wikipedia notability guidelines|notability guidelines]]</b> that you believe the topic meets.",
 	"sng-helptip": "Select one or more notability guidelines that you believe the topic meets",
 	"submit-label": "Submit",
