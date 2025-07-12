@@ -64,7 +64,7 @@ var messages = {
 	"bestsources-placeholder3": "Enter your third source here",
 	"bestsources-desc": "Articles generally require <b>[[Wikipedia:SIGCOV|significant coverage]]</b>, in <b>[[Wikipedia:RS|reliable sources]]</b> (such as newspapers and books), that are <b>[[WP:INDY|independent]]</b> of the topic. You can increase the chance that your draft is reviewed quickly by providing the three strongest sources below:",
 	"sng-desc": "On Wikipedia, <b>[[Wikipedia:Notability|notability]]</b> is a test used by editors to decide whether a given topic warrants its own article. Select one or more <b>[[Category:Wikipedia notability guidelines|notability guidelines]]</b> that you believe the topic meets.",
-	"sng-helptip": "Select one or more notability guidelines that you believe the topic meets",
+	"sng-placeholder": "Select notability guidelines",
 	"submit-label": "Submit",
 	"footer-text": "<small>If you are not sure about what to enter in a field, you can skip it. If you need further help, you can ask at the <b>[[WP:AFCHD|AfC help desk]]</b> or get <b>[[WP:IRCHELP|live help]]</b>.<br>Facing some issues in using this form? <b>[/w/index.php?title=Wikipedia_talk:WikiProject_Articles_for_creation/Submission_wizard&action=edit&section=new&preloadtitle=Issue%20with%20submission%20form&editintro=Wikipedia_talk:WikiProject_Articles_for_creation/Submission_wizard/editintro Report it]</b>.</small>",
 	"submitting-as": "Submitting as User:$1",
@@ -86,6 +86,65 @@ var messages = {
 	"error-saving-talk": "An error occurred in editing the talk page ($1).",
 	"error-main": "An error occurred ($1). Please try again or refer to the help desk."
 };
+
+var sngList = [ ["General", "GNG", "", "Significant coverage in several independent, reliable sources"],
+["Academics", "NPROF", "1", "Significant impact in their scholarly discipline"],
+["Academics", "NPROF", "2", "Highly prestigious academic award or honor at a national or international level"],
+["Academics", "NPROF", "3a", "Elected member of a highly selective and prestigious scholarly society or association"],
+["Academics", "NPROF", "3b", "Fellow of a major scholarly society which reserves fellow status as a highly selective honor"],
+["Academics", "NPROF", "4", "Significant impact in the area of higher education"],
+["Academics", "NPROF", "5a", "Distinguished professor appointment at a major institution of higher education and research"],
+["Academics", "NPROF", "5b", "Named chair appointment that indicates a comparable level of achievement"],
+["Academics", "NPROF", "5c", "Equivalent position in countries where named chairs are uncommon"],
+["Academics", "NPROF", "6", "Highest-level elected or appointed administrative post at a major academic institution or society"],
+["Academics", "NPROF", "7", "Substantial impact outside academia in their academic capacity"],
+["Academics", "NPROF", "8", "Head or chief editor of a major, well-established academic journal in their subject area"],
+["Astronomical objects", "NASTRO", "1", "Visible to the naked eye (<6.0 magnitude) at some point"],
+["Astronomical objects", "NASTRO", "2", "Listed in a catalogue of high historical importance or high interest to amateur astronomers"],
+["Astronomical objects", "NASTRO", "3", "Significant commentary in multiple non-trivial published works"],
+["Astronomical objects", "NASTRO", "4", "Discovered before 1850"],
+["Books", "NBOOK", "1", "Subject of two or more non-trivial published works appearing in sources that are independent of the book itself"],
+["Books", "NBOOK", "2", "Won a major literary award"],
+["Books", "NBOOK", "3", "Considered to have made a significant contribution to sciences, humanities or arts, or to an event, political or religious movement"],
+["Books", "NBOOK", "4", "Subject of instruction at two or more schools, colleges, universities or post-graduate programs in any particular country"],
+["Books", "NBOOK", "5", "Author of exceptional significance and a common subject of academic study"],
+["Films", "NFOE", "1", "Widely distributed and has received full-length reviews by two or more nationally known critics"],
+["Films", "NFOE", "2a", "Two non-trivial articles at least five years after the film's initial release"],
+["Films", "NFOE", "2b", "Deemed notable by a broad survey of film critics, academics, or movie professionals, at least five years after the film's release"],
+["Films", "NFOE", "2c", "Commercial re-release, or festival screening, at least five years after initial release"],
+["Films", "NFOE", "2d", "Featured as part of a documentary, program, or retrospective on the history of cinema"],
+["Films", "NFOE", "3", "Received a major award for excellence in some aspect of filmmaking"],
+["Films", "NFOE", "4", "Selected for preservation in a national archive"],
+["Films", "NFOE", "5", "Taught as a subject at an accredited university or college with a notable film program"],
+["Films", "NFIC", "1", "Represents a unique accomplishment in cinema, or is a milestone in the development of film art or of a national cinema"], // Not a mistake, NFILM has two sets of numbers
+["Films", "NFIC", "2", "Significant involvement by a notable person and is a major part of their career"],
+["Films", "NFIC", "3", "Produced and successfully distributed domestically by a \"major film studio\" in a country that is not a major film producing country"],
+["Geographic features (natural)", "NATFEAT", "", "Named natural feature with verifiable content"],
+["Geographic features (artificial)", "GEOFEAT", "", "Officially assigned a protected status on a national level, with verifiable conntent"],
+["Places", "NPLACE", "", "Populated, legally recognized places"],
+["Roads", "NROAD", "", "International road networks, or Interstate, national, state or provincial highway"],
+["Musicians and ensembles", "MUSICBIO", "2", "Had a single or album on any country's national music chart."],
+["Musicians and ensembles", "MUSICBIO", "3", "Had a record certified gold or higher in at least one country"],
+["Musicians and ensembles", "MUSICBIO", "4", "Non-trivial coverage in independent reliable sources of an international or national concert tour"],
+["Musicians and ensembles", "MUSICBIO", "5", "Released two or more albums on a major record label or on one of the more important indie labels"],
+["Musicians and ensembles", "MUSICBIO", "6a", "Ensemble that contains two or more musicians with Wikipedia articles"],
+["Musicians and ensembles", "MUSICBIO", "6b", "Musician who has been a reasonably prominent member of two or more ensembles with Wikipedia articles"],
+["Musicians and ensembles", "MUSICBIO", "7", "One of the most prominent representatives of a notable style or the most prominent of the local scene of a city"],
+["Musicians and ensembles", "MUSICBIO", "8", "Won or nominated for a major music award, such as a Grammy, Juno, Mercury, Choice or Grammis award"],
+["Musicians and ensembles", "MUSICBIO", "9", "Won first, second, or third place in a major music competition"],
+["Musicians and ensembles", "MUSICBIO", "10", "Performed music for a work of media that is notable, and not suitable for a redirect"],
+["Musicians and ensembles", "MUSICBIO", "11", "Placed in rotation nationally by a major radio or music television network"],
+["Musicians and ensembles", "MUSICBIO", "12", "Featured subject of a substantial broadcast segment across a national radio or television network"],
+["Ensemble members", "BANDMEMBER", "", ""],
+["Composers and lyricists", "COMPOSER", "", ""],
+["Other musicians", "NMUSICOTHER", "", ""],
+["Recordings", "NALBUM", "", ""],
+["Numbers", "NNUM", "", ""],
+["Organizations and companies", "NCORP", "", ""],
+["People", "NBIO", "", ""],
+["Species", "NSPECIES", "", "Eukaryotic species accepted by taxonomists"],
+["Sports", "NSPORT", "", ""],
+["Web", "NWEB", "", ""] ];
 
 function init() {
 	for (var key in messages) {
@@ -193,15 +252,14 @@ function constructUI() {
 			ui.sngLayout = new OO.ui.FieldLayout(ui.sngInput = new OO.ui.MenuTagMultiselectWidget({
 				tagLimit: 10,
 				autocomplete: false, // XXX: doesn't seem to work
-				options: [ "General", "Academics", "Astronomical objects", "Books", "Events", "Films", "Geographic features", "Music", "Video games", "Numbers", "Organizations and companies", "People", "Species", "Sports", "Web" ].map(function (e) {
+				options: sngList.map(function (e) {
 					return {
-						data: e,
-						label: e
+						data: [e[1], e[2]],
+						label: e[0] + (e[2] ? " #" + e[2] : "") + " – " + e[3]
 					};
-				})
-			}), {
-				align: 'top',
-			}),
+				}),
+				placeholder: msg('sng-placeholder')
+			})),
 			
 			ui.sourceLayoutDesc = new OO.ui.FieldLayout(new OO.ui.LabelWidget({
 				label: $('<div>')
@@ -274,6 +332,11 @@ function constructUI() {
 
 	// Attach
 	$('#afc-submit-wizard-container').empty().append(ui.fieldset.$element, ui.footerLayout.$element);
+	
+	$("#" + ui.sngLayout.getElementId()).css("margin-top", "4px");
+	$("#" + ui.sourceLayout1.getElementId()).css("margin-top", "4px");
+	$("#" + ui.sourceLayout2.getElementId()).css("margin-top", "4px");
+	$("#" + ui.sourceLayout3.getElementId()).css("margin-top", "4px");
 
 	// Populate talk page tags for multi-select widget
 	afc.talkTagOptionsLoaded = getJSONPage('Wikipedia:WikiProject Articles for creation/WikiProject templates.json').then(function (data) {
@@ -764,7 +827,7 @@ function prepareDraftText(page) {
 
 	// Check for best sources
 	sng = ui.sngInput.getValue();
-	sng = sng.map(x => x.toLowerCase());
+	sng = sng.map(x => x[1] == '' ? '[[WP:' + x[0] + ']]' : '[[WP:' + x[0] + ']]#' + x[1]);
 	sourcesExist = ui.bestsourcesInput1.getValue() || ui.bestsourcesInput2.getValue() || ui.bestsourcesInput3.getValue();
 	if (sng.length > 0 || sourcesExist) {
 		header += '{{afc comment|1=';
@@ -772,7 +835,7 @@ function prepareDraftText(page) {
 			if (sng.length > 1) {
 				sng[sng.length - 1] = 'and ' + sng[sng.length - 1];
 			}
-			header += 'I believe this article meets the ' + sng.join(sng.length > 2 ? ', ' : ' ') + ' notability guideline' + (sng.length > 1 ? 's' : '') + '. ';
+			header += 'I believe this article meets ' + sng.join(sng.length > 2 ? ', ' : ' ') + '. ';
 		}
 		if (sourcesExist) {
 			header += '[[WP:THREE]] sources are available on the talk page. ';
