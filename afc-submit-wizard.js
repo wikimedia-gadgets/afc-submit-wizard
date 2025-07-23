@@ -132,19 +132,44 @@ var sngList = [ ["General", "GNG", "", "Significant coverage in several independ
 ["Musicians and ensembles", "MUSICBIO", "7", "One of the most prominent representatives of a notable style or the most prominent of the local scene of a city"],
 ["Musicians and ensembles", "MUSICBIO", "8", "Won or nominated for a major music award, such as a Grammy, Juno, Mercury, Choice or Grammis award"],
 ["Musicians and ensembles", "MUSICBIO", "9", "Won first, second, or third place in a major music competition"],
-["Musicians and ensembles", "MUSICBIO", "10", "Performed music for a work of media that is notable, and not suitable for a redirect"],
+["Musicians and ensembles", "MUSICBIO", "10", "Performed music for a work of media with a Wikipedia article, and not suitable for a redirect"],
 ["Musicians and ensembles", "MUSICBIO", "11", "Placed in rotation nationally by a major radio or music television network"],
 ["Musicians and ensembles", "MUSICBIO", "12", "Featured subject of a substantial broadcast segment across a national radio or television network"],
-["Ensemble members", "BANDMEMBER", "", ""],
-["Composers and lyricists", "COMPOSER", "", ""],
-["Other musicians", "NMUSICOTHER", "", ""],
-["Recordings", "NALBUM", "", ""],
-["Numbers", "NNUM", "", ""],
-["Organizations and companies", "NCORP", "", ""],
-["People", "NBIO", "", ""],
-["Species", "NSPECIES", "", "Eukaryotic species accepted by taxonomists"],
-["Sports", "NSPORT", "", ""],
-["Web", "NWEB", "", ""] ];
+["Composers and lyricists", "COMPOSER", "1", "Credit for writing or co-writing either lyrics or music for a composition with a Wikipedia article"],
+["Composers and lyricists", "COMPOSER", "2", "Wrote musical theatre of some sort that was performed in a theatre with a Wikipedia article that had a reasonable run"],
+["Composers and lyricists", "COMPOSER", "3", "Work used as the basis for a later composition by a songwriter, composer, or lyricist who meets the above criteria"],
+["Composers and lyricists", "COMPOSER", "4", "Wrote a composition that has won a major music competition not established expressly for newcomers"],
+["Composers and lyricists", "COMPOSER", "5", "Listed as a major influence or teacher of a composer, songwriter, or lyricist who meets the above criteria"],
+["Composers and lyricists", "COMPOSER", "6", "Appears at reasonable length in standard reference books on their genre of music"],
+["Musicians (others)", "NMUSICOTHER", "1", "Frequently covered in publications devoted to a music sub-culture with a Wikipedia article"],
+["Musicians (others)", "NMUSICOTHER", "2", "Composed a number of melodies or tunes with their own Wikipedia articles, or standards used in a notable music genre"],
+["Musicians (others)", "NMUSICOTHER", "3", "Cited by reliable sources as being influential in style, technique, repertory, or teaching for a particular music genre"],
+["Musicians (others)", "NMUSICOTHER", "4", "Cited by reliable sources as having established a tradition or school in a particular music genre"],
+["Musicians (others)", "NMUSICOTHER", "5", "Listed as a significant musical influence on musicians or composers who meet the above criteria"],
+["Recordings", "NALBUM", "2", "Appeared on any country's national music chart"],
+["Recordings", "NALBUM", "3", "Certified gold or higher in at least one country"],
+["Recordings", "NALBUM", "4", "Won or been nominated for a major music award, such as a Grammy, Juno, Mercury, Choice or Grammis award"],
+["Recordings", "NALBUM", "5", "Performed in a medium (television show, film, compilation album...) with its own article, and not suitable for a redirect"],
+["Recordings", "NALBUM", "6", "In rotation nationally by a major radio or music television networ"],
+["Recordings", "NALBUM", "7", "Featured subject of a substantial broadcast segment across a national radio or television network"],
+["People", "NBIO", "1", "Received a well-known and significant award or honor, or has been nominated for such an award several times"],
+["People", "NBIO", "2", "Made a widely recognized contribution that is part of the enduring historical record in a specific field"],
+["People", "NBIO", "3", "Has an entry in a country's standard national biographical dictionary"],
+["Creative professionals", "NCREATIVE", "1", "Regarded as an important figure or widely cited by peers or successors"],
+["Creative professionals", "NCREATIVE", "2", "Known for originating a significant new concept, theory, or technique"],
+["Creative professionals", "NCREATIVE", "3", "Created or played a major role in co-creating a significant or well-known work or collective body of work"],
+["Creative professionals", "NCREATIVE", "4a", "Work has become a significant monument"],
+["Creative professionals", "NCREATIVE", "4b", "Work has been a substantial part of a significant exhibition"],
+["Creative professionals", "NCREATIVE", "4c", "Work has won significant critical attention"],
+["Creative professionals", "NCREATIVE", "4d", "Work has been represented within the permanent collections of several notable galleries or museums"],
+["Crime victims", "VICTIM", "", "Had a large role within a well-documented historic event, and not suitable for a redirect"],
+["Crime perpetrators", "PERP", "1", "Victim of the crime is a renowned national or international figure, and not suitable for a redirect"],
+["Crime perpetrators", "PERP", "2", "Motivation or execution of the crime is unusual such that it is a well-documented historic event, and not suitable for a redirect"],
+["Entertainers", "ENT", "1", "Had significant roles in multiple productions with their own article"],
+["Entertainers", "ENT", "2", "Made unique, prolific or innovative contributions to a field of entertainment"],
+["Politicians and judges", "NPOL", "", "Held office at the international or national level"],
+["Politicians and judges (subnational)", "NSUBPOL", "", "Held office at the subnational level in federal states"],
+["Species", "NSPECIES", "", "Eukaryotic species accepted by taxonomists"] ];
 
 function init() {
 	for (var key in messages) {
@@ -249,7 +274,7 @@ function constructUI() {
 				align: 'top'
 			}),
 			
-			ui.sngLayout = new OO.ui.FieldLayout(ui.sngInput = new OO.ui.MenuTagMultiselectWidget({
+			ui.sngLayout = new OO.ui.FieldLayout(ui.sngInput = new OO.ui.DropdownInputWidget({
 				tagLimit: 10,
 				autocomplete: false, // XXX: doesn't seem to work
 				options: sngList.map(function (e) {
@@ -364,6 +389,7 @@ function constructUI() {
 
 	ui.submitButton.on('click', handleSubmit);
 	ui.titleInput.on('change', mw.util.debounce(config.debounceDelay, onDraftInputChange));
+	ui.sngInput.on('change', mw.util.debounce(config.debounceDelay, onSngInputChange));
 
 	if (mw.util.getParamValue('page')) {
 		onDraftInputChange();
@@ -378,6 +404,21 @@ function constructUI() {
 		return '';
 	};
 	$(window).on('beforeunload', afc.beforeUnload);
+}
+
+function onSngInputChange() {
+	var activeSng = ui.sngInput.getValue().split(",");
+	if (activeSng[0] == "GNG") {
+		$("#" + ui.sourceLayoutDesc.getElementId()).css("display", "block");
+		$("#" + ui.sourceLayout1.getElementId()).css("display", "block");
+		$("#" + ui.sourceLayout2.getElementId()).css("display", "block");
+		$("#" + ui.sourceLayout3.getElementId()).css("display", "block");
+	} else {
+		$("#" + ui.sourceLayoutDesc.getElementId()).css("display", "none");
+		$("#" + ui.sourceLayout1.getElementId()).css("display", "none");
+		$("#" + ui.sourceLayout2.getElementId()).css("display", "none");
+		$("#" + ui.sourceLayout3.getElementId()).css("display", "none");
+	}
 }
 
 function onDraftInputChange() {
@@ -826,22 +867,22 @@ function prepareDraftText(page) {
 	header += '{{subst:submit|1=' + (mw.util.getParamValue('username') || '{{subst:REVISIONUSER}}') + '}}\n';
 
 	// Check for best sources
-	sng = ui.sngInput.getValue();
-	sng = sng.map(x => x[1] == '' ? '[[WP:' + x[0] + ']]' : '[[WP:' + x[0] + ']]#' + x[1]);
-	sourcesExist = ui.bestsourcesInput1.getValue() || ui.bestsourcesInput2.getValue() || ui.bestsourcesInput3.getValue();
-	if (sng.length > 0 || sourcesExist) {
-		header += '{{afc comment|1=';
-		if (sng.length > 0) {
-			if (sng.length > 1) {
-				sng[sng.length - 1] = 'and ' + sng[sng.length - 1];
-			}
-			header += 'I believe this article meets ' + sng.join(sng.length > 2 ? ', ' : ' ') + '. ';
-		}
-		if (sourcesExist) {
-			header += '[[WP:THREE]] sources are available on the talk page. ';
-		}
-		header +=  '~~' + '~~}}\n';
+	sng = ui.sngInput.getValue().split(",");
+	sourcesExist = (sng[0] == "GNG") && (ui.bestsourcesInput1.getValue() || ui.bestsourcesInput2.getValue() || ui.bestsourcesInput3.getValue());
+	
+	if(sng[1] != "") {
+		sng = '[[WP:' + sng[0] + ']]#' + sng[1];
+	} else {
+		sng = '[[WP:' + sng[0] + ']]';
 	}
+	
+	header += '{{afc comment|1=';
+	header += 'I believe this article meets ' + sng + '. ';
+	if (sourcesExist) {
+		header += '[[WP:THREE]] sources are available on the talk page. ';
+	}
+	header +=  '~~' + '~~}}\n';
+	
 	// insert everything to the top
 	text = header + text;
 	debug(text);
@@ -882,7 +923,10 @@ function prepareTalkText(initialText) {
 	// remove |class=draft parameter in any WikiProject templates
 	text = text.replace(/(\{\{wikiproject.*?)\|\s*class\s*=\s*draft\s*/gi, '$1');
 	
-	if (ui.bestsourcesInput1.getValue() || ui.bestsourcesInput2.getValue() || ui.bestsourcesInput3.getValue()) {
+	sng = ui.sngInput.getValue().split(",");
+	sourcesExist = (sng[0] == "GNG") && (ui.bestsourcesInput1.getValue() || ui.bestsourcesInput2.getValue() || ui.bestsourcesInput3.getValue());
+	
+	if (sourcesExist) {
 		text = text.replace(/\{\{Best sources\|(.*?)\}\}/g, '');
 		bestSources = '\n== [[WP:THREE]] best sources ==\n{{Best sources';
 		if (ui.bestsourcesInput1.getValue()) {
