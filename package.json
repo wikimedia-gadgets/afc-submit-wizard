@@ -4,7 +4,7 @@
   "description": "Wizard for submitting drafts to AfC",
   "main": "afc-submit-wizard.js",
   "scripts": {
-    "start": "http-server -p 5500 -c-1 --proxy http://localhost:5500/afc-submit-wizard.js\\? -d false"
+    "start": "http-server -p 5500 -c-1 --proxy http://localhost:5500/afc-submit-wizard.js? -d false"
   },
   "repository": {
     "type": "git",

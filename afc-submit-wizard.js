@@ -5,6 +5,9 @@
  * Used on [[Wikipedia:Articles for creation/Submitting]].
  * Loaded via [[mw:Snippets/Load JS and CSS by URL]].
  *
+ * Edits can be proposed via GitHub (https://github.com/wikimedia-gadgets/afc-submit-wizvalidation-notitleard)
+ * or a talk page request.
+ *
  * Author: [[User:SD0001]]
  * Licence: MIT
  */
@@ -46,7 +49,7 @@ var messages = {
 	"page-title": "Submitting your draft ...",
 	"fieldset-label": "Submit your draft for review at Articles for Creation (AfC)",
 	"title-label": "Draft title",
-	"title-placeholder": "Enter the draft title, usually begins with \"Draft:\"",
+	"title-placeholder": "Enter the draft page name, usually begins with \"Draft:\"",
 	"title-helptip": "This should be pre-filled if you clicked the link while on the draft page",
 	"rawclass-label": "Choose the most appropriate category",
 	"rawclass-helptip": "For biographies about scholars, choose one of the two biography categories rather than one associated to their field",
@@ -60,8 +63,9 @@ var messages = {
 	"orestopic-label": "Topic classifiers",
 	"orestopic-helptip": "Pick the topic areas that are relevant",
 	"submit-label": "Submit",
-	"footer-text": "<small>If you are not sure about what to enter in a field, you can skip it. If you need further help, you can ask at the <b>[[WP:AFCHD|AfC help desk]]</b> or get <b>[[WP:IRCHELP|live help]]</b>.<br>Facing some issues in using this form? <b>[/w/index.php?title=Wikipedia_talk:WikiProject_Articles_for_creation/Submission_wizard&action=edit&section=new&preloadtitle=Issue%20with%20submission%20form&editintro=Wikipedia_talk:WikiProject_Articles_for_creation/Submission_wizard/editintro Report it]</b>.</small>",
+	"footer-text": "<small>If you are not sure about what to enter in a field, you can skip it. If you need help, you can ask at the <b>[[WP:AFCHD|AfC help desk]]</b> or get live help via <b>[[WP:IRCHELP|IRC]]</b> or <b>[[WP:DISCORD|Discord]]</b>.<br>Facing some issues in using this form? <b>[/w/index.php?title=Wikipedia_talk:WikiProject_Articles_for_creation/Submission_wizard&action=edit&section=new&preloadtitle=Issue%20with%20submission%20form&editintro=Wikipedia_talk:WikiProject_Articles_for_creation/Submission_wizard/editintro Report it]</b>.</small>",
 	"submitting-as": "Submitting as User:$1",
+	"validation-notitle": "Please enter the draft page name",
 	"validation-invalidtitle": "Please check draft title. This title is invalid.",
 	"validation-missingtitle": "Please check draft title. No such draft exists.",
 	"validation-wrongns": "Please check draft title – it should begin with \"Draft:\" or \"User:\"",
@@ -88,6 +92,16 @@ function init() {
 
 	document.title = msg('document-title');
 	$('#firstHeading').text(msg('page-title'));
+
+	mw.util.addCSS(
+		// CSS adjustments for vector-2022: hide prominent page controls which are
+		// irrelevant and confusing while using the wizard
+		'.vector-page-toolbar { display: none } ' +
+		'.vector-page-titlebar #p-lang-btn { display: none } ' +
+
+		// Hide categories as well, prevents accidental HotCat usage
+		'#catlinks { display: none } '
+	);
 
 	var apiOptions = {
 		parameters: {
@@ -220,6 +234,8 @@ function constructUI() {
 
 	// Attach
 	$('#afc-submit-wizard-container').empty().append(ui.fieldset.$element, ui.footerLayout.$element);
+
+	mw.track('counter.gadget_afcsw.opened');
 
 	// Populate talk page tags for multi-select widget
 	afc.talkTagOptionsLoaded = getJSONPage('Wikipedia:WikiProject Articles for creation/WikiProject templates.json').then(function (data) {
@@ -530,10 +546,18 @@ function setTalkStatus(type, message) {
 function handleSubmit() {
 
 	setMainStatus('notice', msg('status-processing'));
+	mw.track('counter.gadget_afcsw.submit_attempted');
 	ui.submitButton.setDisabled(true);
 	ui.mainStatusLayout.scrollElementIntoView();
 
 	var draft = ui.titleInput.getValue();
+	if (!draft) {
+		ui.titleLayout.setErrors([msg('validation-notitle')]);
+		ui.fieldset.removeItems([ui.mainStatusLayout]);
+		ui.submitButton.setDisabled(false);
+		ui.titleLayout.scrollElementIntoView();
+		return;
+	}
 	debug(draft);
 
 	afc.api.get({
@@ -559,6 +583,7 @@ function handleSubmit() {
 		setMainStatus('notice', msg('status-saving'));
 		saveDraftPage(draft, text).then(function () {
 			setMainStatus('success', msg('status-redirecting'));
+			mw.track('counter.gadget_afcsw.submit_succeeded');
 
 			$(window).off('beforeunload', afc.beforeUnload);
 			setTimeout(function () {
@@ -568,8 +593,11 @@ function handleSubmit() {
 			if (code === 'captcha') {
 				ui.fieldset.removeItems([ui.mainStatusLayout, ui.talkStatusLayout]);
 				ui.captchaLayout.scrollElementIntoView();
+				mw.track('counter.gadget_afcsw.submit_captcha');
 			} else {
 				setMainStatus('error', msg('error-saving-main', makeErrorMessage(code, err)));
+				mw.track('counter.gadget_afcsw.submit_failed');
+				mw.track('counter.gadget_afcsw.submit_failed_' + code);
 			}
 			ui.submitButton.setDisabled(false);
 		});
@@ -601,6 +629,8 @@ function handleSubmit() {
 	}).catch(function (code, err) {
 		setMainStatus('error', msg('error-main', makeErrorMessage(code, err)));
 		ui.submitButton.setDisabled(false);
+		mw.track('counter.gadget_afcsw.submit_failed');
+		mw.track('counter.gadget_afcsw.submit_failed_' + code);
 	});
 
 }

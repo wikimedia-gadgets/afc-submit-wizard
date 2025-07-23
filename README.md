@@ -14,11 +14,12 @@ Visit https://en.wikipedia.org/wiki/Wikipedia:Articles_for_creation/Submitting
 
 ## How to deploy
 
-Copy/paste the code in this repository's afc-submit-wizard.js file to https://en.wikipedia.org/wiki/User:SD0001/AFC-submit-wizard.js
+Copy/paste the code in this repository's afc-submit-wizard.js file to https://en.wikipedia.org/wiki/MediaWiki:AFC-submit-wizard.js
 
 ## How to test
 
-Deploy your test code to https://test.wikipedia.org/wiki/MediaWiki:AFC-submit-wizard.js. Then test the script at https://test.wikipedia.org/wiki/Wikipedia:Articles_for_creation/Submitting.
+* Method 1: Run npm start, which makes the script available on http://localhost:5500/afc-submit-wizard.js. In your testwiki common.js file, add `importScript('http://localhost:5500/afc-submit-wizard.js');` or run it manually from the JS console. 
+* Method 2: Deploy your test code to https://test.wikipedia.org/wiki/MediaWiki:AFC-submit-wizard.js. Then test the script at https://test.wikipedia.org/wiki/Wikipedia:Articles_for_creation/Submitting.
 
 ## More documentation
 
