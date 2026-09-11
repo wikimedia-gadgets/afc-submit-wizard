@@ -5,7 +5,7 @@
  * Used on [[Wikipedia:Articles for creation/Submitting]].
  * Loaded via [[mw:Snippets/Load JS and CSS by URL]].
  *
- * Edits can be proposed via GitHub (https://github.com/wikimedia-gadgets/afc-submit-wizvalidation-notitleard)
+ * Edits can be proposed via GitHub (https://github.com/wikimedia-gadgets/afc-submit-wizard)
  * or a talk page request.
  *
  * Author: [[User:SD0001]]
@@ -62,7 +62,8 @@ var messages = {
 	"orestopic-label": "Topic classifiers",
 	"orestopic-helptip": "Pick the topic areas that are relevant",
 	"submit-label": "Submit",
-	"footer-text": "<small>If you are not sure about what to enter in a field, you can skip it. If you need help, you can ask at the <b>[[WP:AFCHD|AfC help desk]]</b> or get live help via <b>[[WP:IRCHELP|IRC]]</b> or <b>[[WP:DISCORD|Discord]]</b>.<br>Facing some issues in using this form? <b>[/w/index.php?title=Wikipedia_talk:WikiProject_Articles_for_creation/Submission_wizard&action=edit&section=new&preloadtitle=Issue%20with%20submission%20form&editintro=Wikipedia_talk:WikiProject_Articles_for_creation/Submission_wizard/editintro Report it]</b>.</small>",
+	"footer-text": "<small>If you are not sure about what to enter in a field, you can skip it. If you need help, you can ask at the <b>[[WP:AFCHD|AfC help desk]]</b> or get live help via <b>[[WP:IRCHELP|IRC]]</b> or <b>[[WP:DISCORD|Discord]]</b>.</small>",
+	"footer-text-report": "<small>Facing some issues in using this form? <b>[$1 Report it]</b>.</small>",
 	"submitting-as": "Submitting as User:$1",
 	"validation-notitle": "Please enter the draft page name",
 	"validation-invalidtitle": "Please check draft title. This title is invalid.",
@@ -194,12 +195,12 @@ function constructUI() {
 		]
 	});
 
-	ui.footerLayout = new OO.ui.FieldLayout(new OO.ui.LabelWidget({
-		label: $('<div>')
-			.append(linkify(msg('footer-text')))
-	}), {
+	// footer label stored so updateReportLink can refresh it in place
+	ui.footerLabel = new OO.ui.LabelWidget({ label: '' });
+	ui.footerLayout = new OO.ui.FieldLayout(ui.footerLabel, {
 		align: 'top'
 	});
+	updateReportLink();
 
 	afc.topicOptionsLoaded = getJSONPage('Wikipedia:WikiProject Articles for creation/AfC topic map.json').then(function (optionsJson) {
 		var options = [];
@@ -262,6 +263,7 @@ function constructUI() {
 
 	ui.submitButton.on('click', handleSubmit);
 	ui.titleInput.on('change', mw.util.debounce(config.debounceDelay, onDraftInputChange));
+	ui.titleInput.on('change', updateReportLink);
 
 	if (mw.util.getParamValue('page')) {
 		onDraftInputChange();
@@ -804,6 +806,18 @@ function getJSONPage (page) {
 	}).catch(function (code, err) {
 		console.error(makeErrorMessage(code, err));
 	});
+}
+
+// rebuilds the footer text with the report link, topic includes current draft name
+function updateReportLink() {
+	var drafttitle = ui.titleInput.getValue().trim();
+	var topic = 'Issue with submission form' + (drafttitle ? ' - [[' + drafttitle + ']]' : '');
+	var url = '/w/index.php?title=Wikipedia_talk:WikiProject_Articles_for_creation/Submission_wizard' +
+		'&action=edit&section=new&preloadtitle=' + encodeURIComponent(topic) +
+		'&editintro=Wikipedia_talk:WikiProject_Articles_for_creation/Submission_wizard/editintro';
+	ui.footerLabel.setLabel($('<div>').append(
+		linkify(msg('footer-text')) + '<br>' + linkify(msg('footer-text-report', url))
+	));
 }
 
 /**
