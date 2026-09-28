@@ -64,7 +64,7 @@ var messages = {
 	"submit-label": "Submit",
 	"footer-text": "<small>If you are not sure about what to enter in a field, you can skip it. If you need help, you can ask at the <b>[[WP:AFCHD|AfC help desk]]</b> or get live help via <b>[[WP:IRCHELP|IRC]]</b> or <b>[[WP:DISCORD|Discord]]</b>.<br>Facing some issues in using this form? <b>[/w/index.php?title=Wikipedia_talk:WikiProject_Articles_for_creation/Submission_wizard&action=edit&section=new&preloadtitle=Issue%20with%20submission%20form&editintro=Wikipedia_talk:WikiProject_Articles_for_creation/Submission_wizard/editintro Report it]</b>.</small>",
 	"aidisclosure-placeholder": "(eg. \"https://chatgpt.com/share/6a55a5a4-9e00-83e8-97db-f5c281a02067\" or \"I used Google Translate to translate from French Wikipedia\")",
-	"aidisclosure-desc": "<b>If you used an AI chatbot to help create this draft, please share the chat transcript.</b> You can do this by sharing a link (<i>see the [[Wikipedia:Sharing AI chat sessions|how-to guide]]</i>) or by manually copying and pasting the transcript. If you used another AI tool like [[Grammarly]] or [[Google Translate]], or no longer have the transcript, simply describe how you used AI.",
+	"aidisclosure-desc": "If you used an AI chatbot to help create this draft, please share the chat transcript. You can share a link (<i>see the [[Wikipedia:Sharing AI chat sessions|how-to guide]]</i>) or copy-paste the transcript. If you used another AI tool like [[Grammarly]] or [[Google Translate]], or no longer have the transcript, simply describe how you used AI.",
 	"submitting-as": "Submitting as User:$1",
 	"validation-notitle": "Please enter the draft page name",
 	"validation-invalidtitle": "Please check draft title. This title is invalid.",
