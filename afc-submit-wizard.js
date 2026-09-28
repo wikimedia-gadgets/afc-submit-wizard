@@ -202,9 +202,6 @@ function constructUI() {
 			ui.aiDisclosureLayout = new OO.ui.FieldLayout(ui.aiDisclosureInput = new OO.ui.MultilineTextInputWidget({
 				placeholder: msg('aidisclosure-placeholder'),
 				maxLength: 100000,
-				autosize: true,
-				multiline: true,
-				maxRows: 4
 			}), {
 				align: 'top',		
 				helpInline: true,
