@@ -1,6 +1,6 @@
 # AfC-submit-wizard
 
-A tool to help editors submit their already created drafts on English Wikipedia. The tool assists editors with placing {{AfC topic}}s, short descriptions, and WikiProject banners.
+A tool to help editors submit their already created drafts on English Wikipedia. The tool assists editors with placing {{AfC topic}}s, short descriptions, WikiProject banners, and AI disclosures.
 
 The goal is to help a draft writer get their draft found by reviewers that specialize in certain kinds of drafts. These various tags help specialist reviewers find the draft.
 
