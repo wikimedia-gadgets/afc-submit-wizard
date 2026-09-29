@@ -758,9 +758,9 @@ function prepareDraftText(page) {
 	header += '{{subst:submit|1=' + (mw.util.getParamValue('username') || '{{subst:REVISIONUSER}}') + '}}\n';
 
 	// Add AI disclosure
-	var aiDisclosure = ui.aiDisclosureInput.getValue().replace(/<\/?nowiki\s*>/g, '');
+	var aiDisclosure = ui.aiDisclosureInput.getValue().replace(/<\/?nowiki\s*>/g, '').trim();
 	if (aiDisclosure) { 
-		header += '{{afc comment|1=';
+		header += '{{AfC comment|1=';
 		header += 'In preparing this draft, I disclose that AI assistance was used as follows: ';
 		if (aiDisclosure.length > 1500) {
 			header += '{{Hidden begin}}<nowiki>' + aiDisclosure + '</nowiki>{{hidden end}}';			
