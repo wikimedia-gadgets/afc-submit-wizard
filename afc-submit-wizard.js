@@ -75,8 +75,6 @@ var messages = {
 	"status-saving": "Saving draft page ...",
 	"editsummary-main": "Submitting using [[WP:AFCSW|AfC-submit-wizard]]",
 	"status-redirecting": "Submission succeeded. Redirecting you to the draft page ...",
-	"captcha-label": "Please enter the letters appearing in the box below",
-	"captcha-placeholder": "Enter the letters here",
 	"captcha-helptip": "CAPTCHA security check. Click \"Submit\" again when done.",
 	"error-saving-main": "An error occurred ($1). Please try again or refer to the help desk.",
 	"status-saving-talk": "Saving draft talk page ...",
@@ -605,9 +603,11 @@ function handleSubmit() {
 			mw.track('stats.mediawiki_gadget_AFCSW_total', 1, { action: 'submit_succeeded' });
 
 			$(window).off('beforeunload', afc.beforeUnload);
-			setTimeout(function () {
-				location.href = mw.util.getUrl(draft);
-			}, config.redirectionDelay);
+			saveTalkPage(draft).always(function () {
+				setTimeout(function () {
+					location.href = mw.util.getUrl(draft);
+				}, config.redirectionDelay);
+			});
 		}, function (code, err) {
 			if (code === 'captcha') {
 				ui.fieldset.removeItems([ui.mainStatusLayout, ui.talkStatusLayout]);
@@ -620,30 +620,6 @@ function handleSubmit() {
 			}
 			ui.submitButton.setDisabled(false);
 		});
-
-		var talktext = prepareTalkText(afc.talktext);
-		if (!afc.talktext && !talktext) {
-			// No content earlier, no content now. Stop here to avoid
-			// creating the talk page as empty.
-			return;
-		}
-
-		setTalkStatus('notice', msg('status-saving-talk'));
-		afc.api.postWithEditToken({
-			"action": "edit",
-			"title": new mw.Title(draft).getTalkPage().toText(),
-			"text": talktext,
-			"summary": msg('editsummary-talk')
-		}).then(function (data) {
-			if (data.edit && data.edit.result === 'Success') {
-				setTalkStatus('success', msg('status-talk-success'));
-			} else {
-				return $.Deferred().reject('unexpected result');
-			}
-		}).catch(function (code, err) {
-			setTalkStatus('error', msg('error-saving-talk', makeErrorMessage(code, err)));
-		});
-
 
 	}).catch(function (code, err) {
 		setMainStatus('error', msg('error-main', makeErrorMessage(code, err)));
@@ -663,38 +639,87 @@ function saveDraftPage(title, text) {
 		"text": text,
 		"summary": msg('editsummary-main')
 	};
-	if (ui.captchaLayout && ui.captchaLayout.isElementAttached()) {
-		editParams.captchaid = afc.captchaid;
-		editParams.captchaword = ui.captchaInput.getValue();
-		ui.fieldset.removeItems([ui.captchaLayout]);
-	}
-	return afc.api.postWithEditToken(editParams).then(function (data) {
+	return postWithCaptcha(editParams).then(function (data) {
 		if (!data.edit || data.edit.result !== 'Success') {
 			if (data.edit && data.edit.captcha) {
-				// Handle captcha for non-confirmed users
-
-				var url = data.edit.captcha.url;
-				afc.captchaid = data.edit.captcha.id; // abuse of global?
-				ui.fieldset.addItems([
-					ui.captchaLayout = new OO.ui.FieldLayout(ui.captchaInput = new OO.ui.TextInputWidget({
-						placeholder: msg('captcha-placeholder'),
-						required: true
-					}), {
-						warnings: [ new OO.ui.HtmlSnippet('<img src=' + url + '>') ],
-						label: msg('captcha-label'),
-						align: 'top',
-						help: msg('captcha-helptip'),
-						helpInline: true,
-					}),
-				], /* position */ 6); // just after submit button
-				// TODO: submit when enter key is pressed in captcha field
-
-				return $.Deferred().reject('captcha');
-
+				return showCaptcha(data.edit.captcha);
 			} else {
 				return $.Deferred().reject('unexpected-result');
 			}
 		}
+	});
+}
+
+function saveTalkPage(draft) {
+	var talktext = prepareTalkText(afc.talktext);
+	if (!afc.talktext && !talktext) {
+		// No content earlier, no content now. Stop here to avoid
+		// creating the talk page as empty.
+		return $.Deferred().resolve().promise();
+	}
+
+	setTalkStatus('notice', msg('status-saving-talk'));
+	return postWithCaptcha({
+		"action": "edit",
+		"title": new mw.Title(draft).getTalkPage().toText(),
+		"text": talktext,
+		"summary": msg('editsummary-talk')
+	}).then(function (data) {
+		if (data.edit && data.edit.result === 'Success') {
+			setTalkStatus('success', msg('status-talk-success'));
+		} else {
+			return $.Deferred().reject('unexpected result');
+		}
+	}).catch(function (code, err) {
+		setTalkStatus('error', msg('error-saving-talk', makeErrorMessage(code, err)));
+	});
+}
+
+function postWithCaptcha(editParams) {
+	var widget = afc.captchaWidget;
+	if (!widget) {
+		return afc.api.postWithEditToken(editParams);
+	}
+	return $.when(widget.getCaptchaDataForSubmission()).then(function (captchaData) {
+		return afc.api.postWithEditToken($.extend(editParams, captchaData)).always(function () {
+			// An hCaptcha token is valid for one request only
+			widget.updateForFailure();
+		});
+	}, function () {
+		widget.updateForFailure();
+		return $.Deferred().reject('captcha');
+	});
+}
+
+function showCaptcha(captchaData) {
+	var shown = afc.captchaWidget ?
+		$.when(afc.captchaWidget.updateForFailure(captchaData)) :
+		mw.loader.using('ext.confirmEdit.CaptchaWidget').then(function () {
+			var $container = $('<div>');
+			ui.fieldset.addItems([
+				ui.captchaLayout = new OO.ui.FieldLayout(new OO.ui.Widget({ content: [ $container ] }), {
+					align: 'top',
+					help: msg('captcha-helptip'),
+					helpInline: true,
+				}),
+			], /* position */ 6);
+			var widget = new mw.libs.confirmEdit.CaptchaWidget({
+				container: $container[0],
+				interfaceName: 'afc-submit-wizard'
+			});
+			return $.when(widget.updateForFailure(captchaData)).then(function () {
+				return widget.renderCaptcha();
+			}).then(function () {
+				afc.captchaWidget = widget;
+			});
+		});
+	return shown.then(function () {
+		return $.Deferred().reject('captcha');
+	}, function (error) {
+		console.error(error);
+		afc.captchaWidget = null;
+		ui.fieldset.removeItems([ui.captchaLayout]);
+		return $.Deferred().reject('captcha-render-failed');
 	});
 }
 
